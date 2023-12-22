@@ -6,6 +6,7 @@ import type { ShortenedLink } from './models/shortenedLinksRepository.js'
 import { createClient } from 'redis'
 import { PostgresRepository } from './models/postgresRepository.js'
 import pg from 'pg'
+import fs from 'fs'
 
 const app: Application = express()
 const port = (process.env.SERVER_PORT ?? 8000)
@@ -17,9 +18,23 @@ export const redisClient = createClient({
 
 await postgresClient.connect()
 await redisClient.connect()
+createTables()
+
 redisClient.on('error', err => { console.log('Redis Client Error', err) })
 
 export const shortenedLinksRepository: PostgresRepository<ShortenedLink> = new PostgresRepository<ShortenedLink>(postgresClient, 'mapping')
+
+function createTables (): void {
+  console.log('creating tables...')
+  fs.readFile(process.cwd() + '/tables.sql', 'utf8', (err, data) => {
+    if (err != null) {
+      console.error(err)
+      return
+    }
+    console.log(data)
+    void postgresClient.query(data)
+  })
+}
 
 app.listen(port, () => {
   app.use(express.json())

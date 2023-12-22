@@ -48,4 +48,4 @@ async function deleteShortLinkController (req: Request, res: Response): Promise<
   }
 }
 
-export default { generateShortLinkController, deleteShortLinkController, getLink }
+export default { generateShortLinkController, deleteShortLinkController, getLink, generateShortValue }
